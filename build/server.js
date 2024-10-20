@@ -25,12 +25,16 @@ server.get("/check-compliance", (req, res) => __awaiter(void 0, void 0, void 0, 
         if (!websiteURL) {
             return res.status(400).send({ error: "Missing 'websiteURL' parameter" });
         }
-        const result = yield compliance_checker_1.ComplianceChecker.checkComplianceDetails({ websiteURL });
+        const result = yield compliance_checker_1.ComplianceChecker.checkComplianceDetails({
+            websiteURL
+        });
         return res.status(200).json(result);
     }
     catch (error) {
         console.error(error);
-        return res.status(500).send({ error: "Error checking compliance", details: error.message });
+        return res
+            .status(500)
+            .send({ error: "Error checking compliance", details: error.message });
     }
 }));
 server.listen(serverPort, () => {

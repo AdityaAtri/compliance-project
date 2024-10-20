@@ -37,7 +37,6 @@ const _ = __importStar(require("lodash"));
 const scrapper_1 = require("./scrapper");
 const constants_1 = require("./constants");
 const helper_1 = require("./helper");
-const lodash_1 = require("lodash");
 const fetch = require('node-fetch');
 const checkComplianceDetails = (request) => __awaiter(void 0, void 0, void 0, function* () {
     const { websiteURL } = request;
@@ -60,14 +59,14 @@ const checkComplianceDetails = (request) => __awaiter(void 0, void 0, void 0, fu
     // });
     // console.log(await compliancePolicySummary.json());
     const isChunkRequired = true;
-    const tokenLimit = 200;
+    const tokenLimit = 100;
     const webpageChunks = (0, helper_1.chunkText)(webpageContent, tokenLimit, isChunkRequired);
     const policyChunks = (0, helper_1.chunkText)(textFromCompliancePolicy, tokenLimit, isChunkRequired);
     const results = [];
     for (const webChunk of webpageChunks) {
         for (const policyChunk of policyChunks) {
             const prompt = `
-            Act as a compliance checker. Analyze the following text against the given policy.
+            You are a compliance checker. Your task is to analyze the following text against the provided policy.
             
             Policy:
             ${webChunk}
@@ -75,17 +74,18 @@ const checkComplianceDetails = (request) => __awaiter(void 0, void 0, void 0, fu
             Text to analyze:
             ${policyChunk}
             
-            Identify all compliance violations ALWAYS and ONLY in JSON format with each issue represented as object:
+            Your response must always be in valid JSON format and should only identify compliance violations. Each violation should be represented as an object using this structure.
             {
-                    "issue": "Description of the violation",
-                    "location": "Exact text that violates the policy",
-                    "solution: "How it should be fixed according to the policy"
+                "issue": "Description of the violation",
+                "location": "Exact text that violates the policy",
+                "solution": "How it should be fixed according to the policy"
             }
-            Multiple issues should be array of objects.
-            If no violations are found, return an empty array: []
-            Response should be in JSON parsable form
-            Do not add Note: at the end of the response
-        `;
+            For multiple violations, return an array of such objects. If no violations are found, return an empty array:
+            []
+            
+            Important rules:
+            1. The response must always be in JSON format.
+            2. Do not provide any additional notes or explanations beyond the JSON object.`;
             const url = 'https://api.together.xyz/v1/chat/completions';
             const options = {
                 method: 'POST',
@@ -111,7 +111,7 @@ const checkComplianceDetails = (request) => __awaiter(void 0, void 0, void 0, fu
             const result = yield response.json();
             console.log(result);
             if (!_.isEmpty(result.choices[0].message.content)) {
-                results.push(result.choices[0].message.content);
+                results.push((result.choices[0].message.content));
             }
             // const response = await fetch("https://api-inference.huggingface.co/models/deepset/roberta-base-squad2", {
             //     method: 'POST',
@@ -133,7 +133,7 @@ const checkComplianceDetails = (request) => __awaiter(void 0, void 0, void 0, fu
             //     throw new Error(`Error checking compliance: ${response.statusText}`);
             // }
             // const result = await response.json();
-            yield (0, lodash_1.delay)(1000);
+            yield (0, helper_1.delay)(1000);
         }
     }
     // console.log(results);

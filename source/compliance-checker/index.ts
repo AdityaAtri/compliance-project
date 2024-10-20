@@ -27,7 +27,7 @@ const checkComplianceDetails = async (request: GetComplianceRequest): Promise<Ge
     // });
     // console.log(await compliancePolicySummary.json());
     const isChunkRequired = true;
-    const tokenLimit = 200;
+    const tokenLimit = 100;
     const webpageChunks = chunkText(webpageContent, tokenLimit, isChunkRequired);
     const policyChunks = chunkText(textFromCompliancePolicy, tokenLimit, isChunkRequired);
 
@@ -35,7 +35,7 @@ const checkComplianceDetails = async (request: GetComplianceRequest): Promise<Ge
     for (const webChunk of webpageChunks) {
         for (const policyChunk of policyChunks) {
             const prompt = `
-            Act as a compliance checker. Analyze the following text against the given policy.
+            You are a compliance checker. Your task is to analyze the following text against the provided policy.
             
             Policy:
             ${webChunk}
@@ -43,17 +43,18 @@ const checkComplianceDetails = async (request: GetComplianceRequest): Promise<Ge
             Text to analyze:
             ${policyChunk}
             
-            Identify all compliance violations ALWAYS and ONLY in JSON format with each issue represented as object:
+            Your response must always be in valid JSON format and should only identify compliance violations. Each violation should be represented as an object using this structure.
             {
-                    "issue": "Description of the violation",
-                    "location": "Exact text that violates the policy",
-                    "solution: "How it should be fixed according to the policy"
+                "issue": "Description of the violation",
+                "location": "Exact text that violates the policy",
+                "solution": "How it should be fixed according to the policy"
             }
-            Multiple issues should be array of objects.
-            If no violations are found, return an empty array: []
-            Response should be in JSON parsable form
-            Do not add Note: at the end of the response
-        `;
+            For multiple violations, return an array of such objects. If no violations are found, return an empty array:
+            []
+            
+            Important rules:
+            1. The response must always be in JSON format.
+            2. Do not provide any additional notes or explanations beyond the JSON object.`;
             const url = 'https://api.together.xyz/v1/chat/completions';
             const options = {
                 method: 'POST',
@@ -79,7 +80,7 @@ const checkComplianceDetails = async (request: GetComplianceRequest): Promise<Ge
             const result = await response.json();
             console.log(result);
             if (!_.isEmpty(result.choices[0].message.content)) {
-                results.push(result.choices[0].message.content);
+                results.push((result.choices[0].message.content));
             }
             // const response = await fetch("https://api-inference.huggingface.co/models/deepset/roberta-base-squad2", {
             //     method: 'POST',

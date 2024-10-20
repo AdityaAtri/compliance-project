@@ -17,7 +17,7 @@ server.get("/check-compliance", async (req: any, res: any) => {
       websiteURL
     });
     return res.status(200).json(result);
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
     return res
       .status(500)
