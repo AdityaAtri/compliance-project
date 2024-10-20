@@ -27,7 +27,7 @@ const checkComplianceDetails = async (request: GetComplianceRequest): Promise<Ge
     // });
     // console.log(await compliancePolicySummary.json());
     const isChunkRequired = true;
-    const tokenLimit = 300;
+    const tokenLimit = 200;
     const webpageChunks = chunkText(webpageContent, tokenLimit, isChunkRequired);
     const policyChunks = chunkText(textFromCompliancePolicy, tokenLimit, isChunkRequired);
 

@@ -59,7 +59,7 @@ const checkComplianceDetails = (request) => __awaiter(void 0, void 0, void 0, fu
     // });
     // console.log(await compliancePolicySummary.json());
     const isChunkRequired = true;
-    const tokenLimit = 300;
+    const tokenLimit = 200;
     const webpageChunks = (0, helper_1.chunkText)(webpageContent, tokenLimit, isChunkRequired);
     const policyChunks = (0, helper_1.chunkText)(textFromCompliancePolicy, tokenLimit, isChunkRequired);
     const results = [];
